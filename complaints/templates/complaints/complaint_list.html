@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}All Complaints{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">All Complaints</h2>
+    <div class="row">
+        {% for complaint in complaints %}
+        <div class="col-12 mb-3">
+            <div class="card" style="background-color: {% if complaint.status == 'pending' %} #e7f3fe {% elif complaint.status == 'in_progress' %} #fce4ec {% elif complaint.status == 'resolved' %} #e8f5e9 {% else %} #ffffff {% endif %}; border: none;">
+                <div class="card-body">
+                    <h5 class="card-title" style="font-weight: bold;">{{ complaint.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        By: {{ complaint.get_user_display }}
+                        <span class="badge" style="background-color: {% if complaint.status == 'pending' %} orange {% elif complaint.status == 'in_progress' %} blue {% elif complaint.status == 'resolved' %} green {% endif %}; border-radius: 50%; width: 15px; height: 15px; display: inline-block;"></span>
+                    </h6>
+                    <p class="card-text">{{ complaint.description }}</p>
+                </div>
+                <div class="card-footer text-muted" style="font-size: 0.9em;">
+                    Submitted on: {{ complaint.created_at|date:"F d, Y" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No complaints found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

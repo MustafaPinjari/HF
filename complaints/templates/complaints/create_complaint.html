@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaints{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Complaints</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'complaints:create' %}" class="btn btn-primary">Submit New Complaint</a>
+    </div>
+</div>
+
+<div class="row">
+    {% for complaint in complaints %}
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ complaint.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    By: {{ complaint.get_user_display }}
+                    <span class="badge bg-{{ complaint.status }}">{{ complaint.status }}</span>
+                </h6>
+                <p class="card-text">{{ complaint.description|truncatewords:50 }}</p>
+                <a href="{% url 'complaints:detail' complaint.pk %}" class="card-link">View Details</a>
+            </div>
+            <div class="card-footer text-muted">
+                Submitted on: {{ complaint.created_at|date:"F d, Y" }}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No complaints found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

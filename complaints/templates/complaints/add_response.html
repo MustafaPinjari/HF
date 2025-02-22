@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Response{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Add Response to Complaint</h3>
+                <h6 class="card-subtitle mb-3 text-muted">{{ complaint.title }}</h6>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Submit Response</button>
+                    <a href="{% url 'complaints:detail' complaint.pk %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

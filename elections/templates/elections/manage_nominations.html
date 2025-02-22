@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load election_tags %}
+
+{% block title %}Manage Nominations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Nominations</h2>
+    
+    {% if nominations %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Election</th>
+                        <th>Candidate</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nomination in nominations %}
+                    <tr>
+                        <td>{{ nomination.election.title }}</td>
+                        <td>{{ nomination.user.get_full_name }}</td>
+                        <td>
+                            <span class="badge bg-{{ nomination.status|get_status_color }}">
+                                {{ nomination.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ nomination.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'elections:review_nomination' nomination.id %}" 
+                               class="btn btn-primary btn-sm">Review</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No nominations to review.</p>
+    {% endif %}
+</div>
+{% endblock %}

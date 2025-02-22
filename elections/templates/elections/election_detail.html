@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load election_tags %}
+
+{% block title %}{{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ election.title }}</h2>
+            <p class="card-text">{{ election.description }}</p>
+            <div class="text-muted mb-3">
+                <p><strong>Nominations Close:</strong> {{ election.nomination_end_date|date:"M d, Y H:i" }}</p>
+                <p><strong>Election Start:</strong> {{ election.start_date|date:"M d, Y H:i" }}</p>
+                <p><strong>Election End:</strong> {{ election.end_date|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if user_nomination %}
+        <div class="alert alert-info">
+            <h4>Your Nomination Status</h4>
+            <p>Status: <span class="badge bg-{{ user_nomination.status|get_status_color }}">
+                {{ user_nomination.status }}
+            </span></p>
+        </div>
+    {% elif can_nominate %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Submit Your Nomination</h4>
+                <a href="{% url 'elections:apply_nomination' election.id %}" class="btn btn-primary">
+                    Apply Now
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <p>You are not eligible to apply for this election.</p>
+        </div>
+    {% endif %}
+
+
+    {% if nominations %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h4>Candidates</h4>
+                <div class="list-group">
+                {% for nomination in nominations %}
+                    <div class="list-group-item">
+                        {% if nomination.profile_picture %}
+                            <img src="{{ nomination.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 100px;">
+                        {% endif %}
+                        <h5 class="mb-1">{{ nomination.user.get_full_name|default:nomination.user.username }}</h5>
+                        <p class="mb-1"><strong>Manifesto:</strong> {{ nomination.manifesto }}</p>
+                        {% if nomination.experience %}
+                            <p class="mb-1"><strong>Experience:</strong> {{ nomination.experience }}</p>
+                        {% endif %}
+                        <p class="text-muted">Votes: <span id="vote-count-{{ nomination.id }}">{{ nomination.vote_count }}</span></p>
+                        
+                        {% if election.start_date <= now and election.end_date >= now %}
+                            {% if not user_has_voted %}
+                                <form method="post" action="{% url 'elections:vote' election.id nomination.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Vote</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No approved nominations yet.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function fetchVoteCounts() {
+        const electionId = {{ election.id }};
+        fetch(`/elections/${electionId}/vote_counts/`)
+            .then(response => response.json())
+            .then(data => {
+                for (const [nominationId, count] of Object.entries(data)) {
+                    document.getElementById(`vote-count-${nominationId}`).innerText = count;
+                }
+            });
+    }
+
+    setInterval(fetchVoteCounts, 5000);  // Fetch every 5 seconds
+</script>
+{% endblock %} 
