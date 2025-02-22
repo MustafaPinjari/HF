@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Details{% endblock %}
+
+{% block content %}
+<h2>{{ event.title }}</h2>
+<p><strong>Date:</strong> {{ event.date }}</p>
+<p><strong>Sponsored by:</strong> {{ event.sponsor }}</p>
+<p><strong>Budget:</strong> ${{ event.budget }}</p>
+<p><strong>Expenses:</strong> ${{ event.expenses }}</p>
+<p><strong>Sponsorship Amount:</strong> ${{ event.sponsorship_amount }}</p>
+<p><strong>Utilization Details:</strong> {{ event.utilization_details }}</p>
+
+{% if event.expense_proof %}
+    <p><strong>Expense Proof:</strong> <a href="{{ event.expense_proof.url }}" target="_blank">View Proof</a></p>
+{% endif %}
+
+<a href="{% url 'facilities:event_list' %}" class="btn btn-secondary">Back to Events</a>
+{% endblock %}

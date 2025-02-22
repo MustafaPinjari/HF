@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Extracurricular Activities{% endblock %}
+
+{% block content %}
+<h2>Extracurricular Activities</h2>
+<ul>
+    {% for activity in activities %}
+        <li>
+            <h3>{{ activity.name }}</h3>
+            <p>{{ activity.description }}</p>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

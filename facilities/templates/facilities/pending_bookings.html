@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Bookings{% endblock %}
+
+{% block content %}
+<h2>Pending Booking Requests</h2>
+<div class="row">
+    {% for booking in bookings %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ booking.facility.name }}</h5>
+                <p class="card-text">
+                    <strong>User:</strong> {{ booking.user.username }}<br>
+                    <strong>Date:</strong> {{ booking.start_time|date:"F d, Y" }}<br>
+                    <strong>Time:</strong> {{ booking.start_time|time }} - {{ booking.end_time|time }}<br>
+                    <strong>Purpose:</strong> {{ booking.purpose }}<br>
+                </p>
+                <form method="post" action="{% url 'facilities:approve_booking' booking.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+                <form method="post" action="{% url 'facilities:reject_booking' booking.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No pending bookings.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

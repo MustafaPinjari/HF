@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Transport Facilities{% endblock %}
+
+{% block content %}
+<h2>Transport Facilities</h2>
+<div class="row">
+    {% for transport in transport_facilities %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            {% if transport.image %}
+            <img src="{{ transport.image.url }}" class="card-img-top" alt="{{ transport.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ transport.name }}</h5>
+                <p>{{ transport.description }}</p>
+                <p>Capacity: {{ transport.capacity }} people</p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No transport facilities available.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

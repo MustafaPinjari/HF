@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Alumni Network{% endblock %}
+
+{% block content %}
+<h2>Alumni Network</h2>
+<ul>
+    {% for alum in alumni %}
+        <li>
+            <h3>{{ alum.name }}</h3>
+            <p>Graduation Year: {{ alum.graduation_year }}</p>
+            <p><a href="{{ alum.linkedin_profile }}" target="_blank">LinkedIn Profile</a></p>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>My Facility Bookings</h2>
+    </div>
+    
+    {% for booking in bookings %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ booking.facility.name }}</h5>
+                <p class="card-text">
+                    <strong>Date:</strong> {{ booking.start_time|date:"F d, Y" }}<br>
+                    <strong>Time:</strong> {{ booking.start_time|time }} - {{ booking.end_time|time }}<br>
+                    <strong>Purpose:</strong> {{ booking.purpose }}<br>
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                </p>
+                {% if booking.status == 'approved' %}
+                    <p class="text-success">Your booking has been approved!</p>
+                {% endif %}
+                {% if booking.status == 'pending' %}
+                    {% if request.user.role == 'admin' %}
+                        <a href="{% url 'facilities:approve_booking' booking.id %}" class="btn btn-success">Approve</a>
+                        <a href="{% url 'facilities:reject_booking' booking.id %}" class="btn btn-danger">Reject</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="card-footer text-muted">
+                Booked on: {{ booking.created_at|date:"F d, Y" }}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>You haven't made any bookings yet.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

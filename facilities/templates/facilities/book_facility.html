@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Facility{% endblock %}
+
+{% block content %}
+<h2>Book {{ facility.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Submit Booking Request</button>
+</form>
+<a href="{% url 'facilities:facility_list' %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}

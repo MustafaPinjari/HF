@@ -1,0 +1,30 @@
+<!-- college_system/courses/templates/courses/course_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Available Courses{% endblock %}
+
+{% block content %}
+<h2>Available Courses</h2>
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            {% if course.image %}
+            <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ course.title }}</h5>
+                <p>{{ course.syllabus }}</p>
+                <p>Credits: {{ course.credits }}</p>
+                <p>Department: {{ course.department }}</p>
+                <a href="{% url 'facilities:book' course.id %}" class="btn btn-primary">Enroll Now</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No courses available.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

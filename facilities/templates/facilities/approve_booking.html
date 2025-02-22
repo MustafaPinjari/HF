@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Approve Booking{% endblock %}
+
+{% block content %}
+<h2>Approve Booking for {{ booking.facility.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="admin_comments" class="form-label">Admin Comments</label>
+        <textarea class="form-control" id="admin_comments" name="admin_comments" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Approve</button>
+</form>
+<a href="{% url 'facilities:my_bookings' %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}

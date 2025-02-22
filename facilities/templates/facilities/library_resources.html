@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Library Resources{% endblock %}
+
+{% block content %}
+<h2>Library Resources</h2>
+<ul>
+    {% for resource in resources %}
+        <li>
+            <h3>{{ resource.title }}</h3>
+            <p>Author: {{ resource.author }}</p>
+            <p>Type: {{ resource.resource_type }}</p>
+            <p>Available: {{ resource.availability|yesno:"Yes,No" }}</p>
+            {% if resource.pdf_url %}
+                <p><a href="{{ resource.pdf_url }}" target="_blank" class="btn btn-primary">Open PDF</a></p>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Facilities{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Available Facilities</h2>
+    
+    <div class="mb-3 text-center d-flex flex-wrap justify-content-center">
+        <a href="{% url 'facilities:course_list' %}" class="btn btn-primary mx-2 mb-2">Courses</a>
+        <a href="{% url 'facilities:event_list' %}" class="btn btn-primary mx-2 mb-2">Upcoming Events</a>
+        <a href="{% url 'facilities:library_resources' %}" class="btn btn-primary mx-2 mb-2">Library Resources</a>
+        <a href="{% url 'facilities:career_services' %}" class="btn btn-primary mx-2 mb-2">Career Services</a>
+        <a href="{% url 'facilities:support_services' %}" class="btn btn-primary mx-2 mb-2">Support Services</a>
+        <a href="{% url 'facilities:extracurricular_activities' %}" class="btn btn-primary mx-2 mb-2">Extracurricular Activities</a>
+        <a href="{% url 'facilities:alumni_network' %}" class="btn btn-primary mx-2 mb-2">Alumni Network</a>
+        <a href="{% url 'facilities:transport_facilities' %}" class="btn btn-primary mx-2 mb-2">Transport Facilities</a>
+    </div>
+
+    <h3>Facilities</h3>
+    <div class="row">
+        {% for facility in facilities %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                {% if facility.image %}
+                <img src="{{ facility.image.url }}" class="card-img-top" alt="{{ facility.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ facility.name }}</h5>
+                    <p class="card-text">{{ facility.description }}</p>
+                    <p>Capacity: {{ facility.capacity }} people</p>
+                    
+                    {% with user_bookings=user.bookings.all %}
+                        {% if user_bookings %}
+                            {% for booking in user_bookings %}
+                                {% if booking.facility == facility %}
+                                    {% if booking.status == 'approved' %}
+                                        <p class="text-success">&#10004; Approved</p>  <!-- Tick mark for approved -->
+                                    {% else %}
+                                        <p class="text-warning">Pending Approval</p>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-success">Available for booking</p>
+                            <a href="{% url 'facilities:book' facility.id %}" class="btn btn-primary">Book Now</a>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>No facilities available.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
