@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load election_tags %}
+
+{% block title %}Profile - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Social Links Section -->
+    <div class="mb-4">
+        <h5>Social Links</h5>
+        <div class="d-flex justify-content-start">
+            {% if user.linkedin_profile %}
+                <a href="{{ user.linkedin_profile }}" class="btn btn-primary btn-sm me-2" target="_blank">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            {% endif %}
+            {% if user.github_profile %}
+                <a href="{{ user.github_profile }}" class="btn btn-dark btn-sm" target="_blank">
+                    <i class="fab fa-github"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Banner Section -->
+    <div class="banner d-flex align-items-center p-3 mb-4" style="background-color: white; color: black;">
+        <div class="profile-image me-3">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 100px; height: 100px;">
+            {% else %}
+                <img src="{% static 'images/default.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 100px; height: 100px;">
+            {% endif %}
+        </div>
+        <div class="user-info">
+            <h2>{{ user.username }}</h2>
+            <p>{{ user.get_department_display }}</p>
+            <p>
+                <i class="fas fa-phone"></i> {{ user.phone }} &nbsp; 
+                <i class="fas fa-envelope"></i> {{ user.email }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Election Participation -->
+
+    <!-- Update Profile Section -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4>Update Profile</h4>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Administration" {% if user.department == "Administration" %}selected{% endif %}>Administration</option>
+                                <!-- Add other departments as needed -->
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="profile_picture" class="form-label">Profile Picture</label>
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="linkedin_profile" class="form-label">LinkedIn Profile</label>
+                            <input type="url" class="form-control" id="linkedin_profile" name="linkedin_profile" value="{{ user.linkedin_profile }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="github_profile" class="form-label">GitHub Profile</label>
+                            <input type="url" class="form-control" id="github_profile" name="github_profile" value="{{ user.github_profile }}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dropdown Menu -->
+    <div class="action-buttons">
+        <h5>Select Action</h5>
+        <div class="button-group">
+            <button class="action-button" onclick="showForm('complaints')">Complaints</button>
+            <button class="action-button" onclick="showForm('leave')">Leave Request</button>
+            <button class="action-button" onclick="showForm('health')">Health Request</button>
+        </div>
+    </div>
+
+    <!-- Complaints Form -->
+    <div class="form-section" id="complaintsForm" style="display: none;">
+        <h4 class="form-title">Submit Complaint</h4>
+        <form method="post" action="{% url 'complaints:submit_complaint' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
+                <label class="form-check-label" for="is_anonymous">Submit Anonymously</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Complaint</button>
+        </form>
+    </div>
+
+    <!-- Leave Request Form -->
+    <div class="form-section" id="leaveForm" style="display: none;">
+        <h4 class="form-title">Submit Leave Request</h4>
+        <form method="post" action="{% url 'accounts:submit_leave_request' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="leave_request" class="form-label">Leave Request Details</label>
+                <textarea class="form-control" id="leave_request" name="leave_request" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="leave_proof" class="form-label">Upload Proof (max 2MB)</label>
+                <input type="file" class="form-control" id="leave_proof" name="leave_proof" accept="image/*,application/pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Leave Request</button>
+        </form>
+    </div>
+
+    <!-- Health Request Form -->
+    <div class="form-section" id="healthForm" style="display: none;">
+        <h4 class="form-title">Submit Health Request</h4>
+        <form method="post" action="{% url 'accounts:submit_health_request' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="health_request" class="form-label">Health Request Details</label>
+                <textarea class="form-control" id="health_request" name="health_request" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="health_proof" class="form-label">Upload Proof (max 2MB)</label>
+                <input type="file" class="form-control" id="health_proof" name="health_proof" accept="image/*,application/pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Health Request</button>
+        </form>
+    </div>
+
+    <!-- Complaints History Section -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4>My Complaints History</h4>
+                {% if complaints %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for complaint in complaints %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'complaints:detail' complaint.pk %}">
+                                                {{ complaint.title }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if complaint.status == 'pending' %}bg-warning
+                                                {% elif complaint.status == 'in_progress' %}bg-info
+                                                {% elif complaint.status == 'resolved' %}bg-success
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ complaint.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if complaint.is_anonymous %}
+                                                <span class="badge bg-secondary">Anonymous</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">Regular</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No complaints submitted yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showForm(formType) {
+        // Hide all forms initially
+        document.getElementById('complaintsForm').style.display = 'none';
+        document.getElementById('leaveForm').style.display = 'none';
+        document.getElementById('healthForm').style.display = 'none';
+
+        // Show the corresponding form based on the selected type
+        if (formType === 'complaints') {
+            document.getElementById('complaintsForm').style.display = 'block';
+        } else if (formType === 'leave') {
+            document.getElementById('leaveForm').style.display = 'block';
+        } else if (formType === 'health') {
+            document.getElementById('healthForm').style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}
