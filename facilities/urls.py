@@ -20,4 +20,5 @@ urlpatterns = [
     path('extracurricular-activities/', views.extracurricular_activities, name='extracurricular_activities'),
     path('alumni-network/', views.alumni_network, name='alumni_network'),
     path('transport-facilities/', views.transport_facilities, name='transport_facilities'),
+    path('events/create/', views.create_event, name='create_event'),
 ]

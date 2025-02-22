@@ -8,11 +8,9 @@ venv\Scripts\activate
 ```
 # Install required packages
 ```
-pip install django
-pip install django-crispy-forms
-pip install pillow
-pip install django-crispy-bootstrap4 --index-url=https://pypi.org/simple
+pip install django-crispy-forms crispy-bootstrap4
 ```
+
 # For Testing purposes
 ```
 ID : MustafaPinjari

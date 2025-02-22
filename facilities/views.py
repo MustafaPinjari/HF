@@ -143,9 +143,7 @@ def create_event(request):
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Event created successfully!')
-            return redirect('facilities:event_list')
+            return redirect('facilities:event_list')  # Redirect to the event list after saving
     else:
         form = EventForm()
-    
-    return render(request, 'facilities/event_form.html', {'form': form, 'title': 'Create Event'})
+    return render(request, 'facilities/create_event.html', {'form': form})

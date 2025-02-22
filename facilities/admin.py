@@ -17,7 +17,11 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = ('title', 'date', 'sponsor', 'budget', 'expenses', 'sponsorship_amount')
-    fields = ('title', 'date', 'sponsor', 'budget', 'expenses', 'sponsorship_amount', 'utilization_details', 'expense_proof')
+    list_filter = ('date', 'sponsor')
+    search_fields = ('title', 'sponsor')
+    readonly_fields = ('created_at',)
+    fields = ('title', 'date', 'sponsor', 'image', 'budget', 'expenses', 
+             'sponsorship_amount', 'utilization_details', 'expense_proof')
 
 @admin.register(LibraryResource)
 class LibraryResourceAdmin(admin.ModelAdmin):

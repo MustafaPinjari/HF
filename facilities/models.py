@@ -56,6 +56,13 @@ class Event(models.Model):
     sponsorship_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     utilization_details = models.TextField(blank=True, null=True)
     expense_proof = models.FileField(upload_to='expense_proofs/', blank=True, null=True)
+    image = models.ImageField(upload_to='events/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_utilization_lines(self):
+        if self.utilization_details:
+            return self.utilization_details.split('\n')
+        return []
 
     def __str__(self):
         return self.title

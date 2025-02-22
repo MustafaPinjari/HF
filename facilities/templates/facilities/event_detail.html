@@ -1,19 +1,69 @@
 {% extends 'base.html' %}
 
-{% block title %}Event Details{% endblock %}
+{% block title %}{{ event.title }} - Event Details{% endblock %}
 
 {% block content %}
-<h2>{{ event.title }}</h2>
-<p><strong>Date:</strong> {{ event.date }}</p>
-<p><strong>Sponsored by:</strong> {{ event.sponsor }}</p>
-<p><strong>Budget:</strong> ${{ event.budget }}</p>
-<p><strong>Expenses:</strong> ${{ event.expenses }}</p>
-<p><strong>Sponsorship Amount:</strong> ${{ event.sponsorship_amount }}</p>
-<p><strong>Utilization Details:</strong> {{ event.utilization_details }}</p>
-
-{% if event.expense_proof %}
-    <p><strong>Expense Proof:</strong> <a href="{{ event.expense_proof.url }}" target="_blank">View Proof</a></p>
-{% endif %}
-
-<a href="{% url 'facilities:event_list' %}" class="btn btn-secondary">Back to Events</a>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">{{ event.title }}</h2>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-card bg-light p-3 rounded">
+                                <h5 class="mb-3"><i class="far fa-calendar-alt me-2"></i>Event Details</h5>
+                                <p><strong>Date:</strong> {{ event.date|date:"F d, Y" }}</p>
+                                <p><strong>Time:</strong> {{ event.date|time:"g:i A" }}</p>
+                                <p><strong>Sponsored by:</strong> {{ event.sponsor }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="info-card bg-light p-3 rounded">
+                                <h5 class="mb-3"><i class="fas fa-dollar-sign me-2"></i>Financial Details</h5>
+                                <p><strong>Budget:</strong> ${{ event.budget }}</p>
+                                <p><strong>Expenses:</strong> ${{ event.expenses }}</p>
+                                <p><strong>Sponsorship:</strong> ${{ event.sponsorship_amount }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if event.utilization_details %}
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="fas fa-list-ul me-2"></i>Utilization Details</h5>
+                        <div class="bg-light p-3 rounded">
+                            <ul class="list-group list-group-flush">
+                                {% for line in event.get_utilization_lines %}
+                                <li class="list-group-item bg-transparent">{{ line }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if event.expense_proof %}
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>Expense Documentation</h5>
+                        <a href="{{ event.expense_proof.url }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-download me-2"></i>View Expense Proof
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'facilities:event_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
