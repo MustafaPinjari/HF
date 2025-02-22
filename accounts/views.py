@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Count
 from .forms import UserRegistrationForm, UserUpdateForm, HealthRequestForm, LeaveRequestForm
@@ -11,6 +11,15 @@ from django.utils import timezone
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView as AuthLoginView, PasswordChangeView as AuthPasswordChangeView, PasswordChangeDoneView as AuthPasswordChangeDoneView
 from django.db import models
+from django.core.mail import send_mail
+from django.conf import settings
+from .decorators import (
+    faculty_sports_required,
+    faculty_lab_required,
+    faculty_transport_required,
+    faculty_hod_required,
+    faculty_teaching_required
+)
 
 class LoginView(AuthLoginView):
     template_name = 'accounts/login.html'  # Specify your login template
@@ -18,36 +27,33 @@ class LoginView(AuthLoginView):
 
 @login_required
 def dashboard(request):
-    bookings = Booking.objects.filter(user=request.user)
-    live_results = {}
-    for election in Election.objects.filter(is_active=True):
-        candidates = Nomination.objects.filter(election=election, status='approved')
-        candidate_names = [candidate.user.get_full_name() for candidate in candidates]
-        vote_count = Vote.objects.filter(election=election).count()
-        
-        live_results[election.id] = {
-            'title': election.title,
-            'vote_count': vote_count,
-            'candidates': candidate_names,
-        }
-
+    """
+    Dashboard view that handles both regular and faculty users
+    """
+    user = request.user
     context = {
-        'active_elections': Election.objects.filter(is_active=True),
-        'user_bookings': bookings.order_by('-start_time')[:5],
-        'live_results': live_results,
-        'recent_complaints': Complaint.objects.filter(user=request.user).order_by('-created_at')[:5],
-        'user': request.user  # Ensure user is passed to the context
+        'user': user,
     }
     
-    # Add role-specific data
-    if request.user.role in ['admin', 'faculty']:
+    # Check if user is faculty and route to appropriate dashboard
+    if user.role == 'faculty-sports':
+        # Add sports faculty specific context
+        pending_bookings = Booking.objects.filter(status='pending')
         context.update({
-            'total_students': User.objects.filter(role='student').count(),
-            'department_stats': User.objects.filter(role='student').values('department').annotate(count=Count('id')),
-            'pending_complaints': Complaint.objects.filter(status='pending').count(),
-            'facility_usage': bookings.values('facility__name').annotate(count=Count('id'))
+            'pending_bookings': pending_bookings,
+            'total_pending': pending_bookings.count()
         })
+        return render(request, 'accounts/faculty_sports_dashboard.html', context)
+    elif user.role == 'faculty-lab':
+        return render(request, 'accounts/faculty_lab_dashboard.html', context)
+    elif user.role == 'faculty-transport':
+        return render(request, 'accounts/faculty_transport_dashboard.html', context)
+    elif user.role == 'faculty-hod':
+        return render(request, 'accounts/faculty_hod_dashboard.html', context)
+    elif user.role == 'faculty-teaching':
+        return render(request, 'accounts/faculty_teaching_dashboard.html', context)
     
+    # Regular dashboard for non-faculty users
     return render(request, 'accounts/dashboard.html', context)
 
 def register(request):
@@ -182,3 +188,62 @@ def update_profile(request):
         return redirect('accounts:profile')
 
     return render(request, 'accounts/profile.html', {'user': request.user})
+
+@login_required
+@faculty_sports_required
+def approve_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        action = request.POST.get('action')
+        
+        if action == 'approve':
+            booking.status = 'approved'
+            notification_message = f"Your booking for {booking.facility.name} on {booking.start_time.date()} has been approved."
+        elif action == 'reject':
+            booking.status = 'rejected'
+            notification_message = f"Your booking for {booking.facility.name} on {booking.start_time.date()} has been rejected."
+        
+        booking.save()
+        
+        # Send email notification
+        send_mail(
+            subject=f'Facility Booking {booking.status.title()}',
+            message=notification_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[booking.user.email],
+            fail_silently=True,
+        )
+        
+        # Add success message
+        messages.success(request, f'Booking has been {booking.status}')
+        
+        # Redirect back to the dashboard
+        return redirect('accounts:dashboard')
+        
+    except Booking.DoesNotExist:
+        messages.error(request, 'Booking not found')
+        return redirect('accounts:dashboard')
+
+@login_required
+@faculty_lab_required
+def manage_lab_assignments(request):
+    # Logic for managing lab assignments
+    return render(request, 'accounts/faculty_lab_dashboard.html', {})
+
+@login_required
+@faculty_transport_required
+def assign_transport(request):
+    # Logic for assigning transport
+    return render(request, 'accounts/faculty_transport_dashboard.html', {})
+
+@login_required
+@faculty_hod_required
+def track_users(request):
+    # Logic for tracking users and complaints
+    return render(request, 'accounts/faculty_hod_dashboard.html', {})
+
+@login_required
+@faculty_teaching_required
+def manage_leave_requests(request):
+    # Logic for managing leave requests
+    return render(request, 'accounts/faculty_teaching_dashboard.html', {})

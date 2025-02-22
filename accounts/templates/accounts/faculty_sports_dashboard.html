@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Sports Faculty Dashboard{% endblock %}
+
+{% block content %}
+{% if user.role == 'faculty-sports' %}
+    <div class="container py-4">
+        <h1 class="mb-4">Sports Faculty Dashboard</h1>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title mb-0">Pending Bookings ({{ total_pending }})</h3>
+            </div>
+            <div class="card-body">
+                {% if pending_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in pending_bookings %}
+                                    <tr>
+                                        <td>{{ booking.facility.name }}</td>
+                                        <td>{{ booking.user.username }}</td>
+                                        <td>{{ booking.start_time|date }}</td>
+                                        <td>{{ booking.start_time|time }} - {{ booking.end_time|time }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'accounts:approve_booking' booking.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="approve">
+                                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                            </form>
+                                            <form method="post" action="{% url 'accounts:approve_booking' booking.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="reject">
+                                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No pending bookings at this time.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <a href="{% url 'facilities:facility_management' %}" class="btn btn-primary mb-2">Manage Facilities</a>
+                        <a href="{% url 'facilities:event_list' %}" class="btn btn-info mb-2">Manage Events</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="container py-4">
+        <div class="alert alert-danger">
+            You do not have permission to access this dashboard.
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

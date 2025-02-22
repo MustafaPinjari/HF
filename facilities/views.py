@@ -2,31 +2,48 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
 from .models import Facility, Booking, Course, Event, LibraryResource, CareerService, SupportService, ExtracurricularActivity, Alumni, TransportFacility
-from .forms import BookingForm, EventForm
+from .forms import BookingForm, EventForm, FacilityForm
+from accounts.decorators import faculty_sports_required
 
 @login_required
 def facility_list(request):
+    """View for regular users to see and book facilities"""
     facilities = Facility.objects.all()
-    courses = Course.objects.all()
-    events = Event.objects.all()
-    library_resources = LibraryResource.objects.all()
-    career_services = CareerService.objects.all()
-    support_services = SupportService.objects.all()
-    extracurricular_activities = ExtracurricularActivity.objects.all()
-    alumni = Alumni.objects.all()
-
-    context = {
+    return render(request, 'facilities/facility_list.html', {
         'facilities': facilities,
-        'courses': courses,
-        'events': events,
-        'library_resources': library_resources,
-        'career_services': career_services,
-        'support_services': support_services,
-        'extracurricular_activities': extracurricular_activities,
-        'alumni': alumni,
-    }
+        'is_faculty_sports': request.user.role == 'faculty-sports'
+    })
+
+@login_required
+@faculty_sports_required
+def facility_management(request):
+    """View for faculty-sports to manage facilities"""
+    facilities = Facility.objects.all()
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        capacity = request.POST.get('capacity')
+        location = request.POST.get('location')
+        image = request.FILES.get('image')  # Handle image upload
+        
+        try:
+            facility = Facility.objects.create(
+                name=name,
+                description=description,
+                capacity=capacity,
+                location=location,
+                created_by=request.user
+            )
+            if image:
+                facility.image = image
+                facility.save()
+            
+            messages.success(request, 'Facility created successfully!')
+            return redirect('facilities:facility_management')
+        except Exception as e:
+            messages.error(request, f'Error creating facility: {str(e)}')
     
-    return render(request, 'facilities/facility_list.html', context)
+    return render(request, 'facilities/facility_management.html', {'facilities': facilities})
 
 @login_required
 def book_facility(request, facility_id):
@@ -147,3 +164,28 @@ def create_event(request):
     else:
         form = EventForm()
     return render(request, 'facilities/create_event.html', {'form': form})
+
+@login_required
+@permission_required('facilities.can_manage_facilities')
+def faculty_sports_dashboard(request):
+    # Fetch pending bookings for faculty sports
+    pending_bookings = Booking.objects.filter(status='pending')
+    return render(request, 'facilities/faculty_sports_dashboard.html', {'pending_bookings': pending_bookings})
+
+@login_required
+@faculty_sports_required
+def manage_facilities(request):
+    facilities = Facility.objects.all()
+    
+    if request.method == 'POST':
+        form = FacilityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('facilities:manage_facilities')
+    else:
+        form = FacilityForm()
+    
+    return render(request, 'facilities/manage_facilities.html', {
+        'facilities': facilities,
+        'form': form,
+    })

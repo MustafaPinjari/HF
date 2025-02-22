@@ -1,12 +1,34 @@
 from django.db import models
 from accounts.models import User
+from django.conf import settings
 
 class Facility(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    FACILITY_TYPES = [
+        ('sports', 'Sports Facility'),
+        ('lab', 'Laboratory'),
+        ('transport', 'Transport'),
+        ('classroom', 'Classroom'),
+        ('other', 'Other'),
+    ]
+    
+    name = models.CharField(max_length=200)
     description = models.TextField()
     capacity = models.IntegerField()
+    location = models.CharField(max_length=200, null=True, blank=True)
     image = models.ImageField(upload_to='facilities/', null=True, blank=True)
     is_available = models.BooleanField(default=True)
+    type = models.CharField(max_length=20, choices=FACILITY_TYPES, default='other')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_facilities'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Facilities"
 
     def __str__(self):
         return self.name

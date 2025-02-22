@@ -1,5 +1,5 @@
 from django import forms
-from .models import Booking, Event
+from .models import Booking, Event, Facility
 
 class BookingForm(forms.ModelForm):
     class Meta:
@@ -19,3 +19,8 @@ class EventForm(forms.ModelForm):
             'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'utilization_details': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Enter utilization details (one per line)'}),
         }
+
+class FacilityForm(forms.ModelForm):
+    class Meta:
+        model = Facility
+        fields = ['name', 'description']  # Remove 'location' if it doesn't exist

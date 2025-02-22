@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Facilities{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Manage Facilities</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Add Facility</button>
+    </form>
+    
+    <h2 class="mt-4">Existing Facilities</h2>
+    <ul>
+        {% for facility in facilities %}
+            <li>
+                {{ facility.name }} 
+                <a href="{% url 'facilities:edit_facility' facility.id %}">Edit</a>
+                <a href="{% url 'facilities:delete_facility' facility.id %}">Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %} 

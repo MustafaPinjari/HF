@@ -4,9 +4,13 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     ROLES = (
         ('student', 'Student'),
-        ('faculty', 'Faculty'),
+        ('faculty-sports', 'Faculty - Sports'),
+        ('faculty-lab', 'Faculty - Lab'),
+        ('faculty-transport', 'Faculty - Transport'),
+        ('faculty-hod', 'Faculty - HOD'),
+        ('faculty-teaching', 'Faculty - Teaching Staff'),
         ('admin', 'Administrator'),
-        ('staff', 'Staff')  # Added staff role
+        ('staff', 'Staff'),
     )
 
     DEPARTMENTS = (

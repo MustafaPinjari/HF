@@ -11,4 +11,5 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('submit_health_request/', views.submit_health_request, name='submit_health_request'),
     path('submit_leave_request/', views.submit_leave_request, name='submit_leave_request'),
+    path('approve_booking/<int:booking_id>/', views.approve_booking, name='approve_booking'),
 ]

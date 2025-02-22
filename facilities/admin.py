@@ -6,9 +6,10 @@ from django.shortcuts import render, redirect
 # Register your models here.
 @admin.register(Facility)
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'capacity', 'is_available')  # Include is_available in the list display
-    list_filter = ('is_available',)  # Add filter for availability
-    search_fields = ('name',)
+    list_display = ('name', 'location', 'capacity', 'created_by', 'created_at')
+    list_filter = ('location', 'created_at')
+    search_fields = ('name', 'description', 'location')
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):

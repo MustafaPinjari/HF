@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}View All Facilities{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">All Facilities</h1>
+    
+    <a href="{% url 'facilities:manage_facilities' %}" class="btn btn-secondary mb-3">Manage Facilities</a>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for facility in facilities %}
+                <tr>
+                    <td>{{ facility.name }}</td>
+                    <td>
+                        <a href="{% url 'facilities:edit_facility' facility.id %}">Edit</a>
+                        <a href="{% url 'facilities:delete_facility' facility.id %}">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

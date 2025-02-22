@@ -40,6 +40,12 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(role__in=['faculty-sports', 'faculty-lab', 'faculty-transport', 'faculty-hod', 'faculty-teaching'])
+
 @admin.register(HealthRecord)
 class HealthRecordAdmin(admin.ModelAdmin):
     list_display = ('student', 'condition', 'reported_by', 'date_reported')
