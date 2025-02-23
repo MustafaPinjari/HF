@@ -7,162 +7,349 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Social Links Section -->
-    <div class="mb-4">
-        <h5>Social Links</h5>
-        <div class="d-flex justify-content-start">
-            {% if user.linkedin_profile %}
-                <a href="{{ user.linkedin_profile }}" class="btn btn-primary btn-sm me-2" target="_blank">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-            {% endif %}
-            {% if user.github_profile %}
-                <a href="{{ user.github_profile }}" class="btn btn-dark btn-sm" target="_blank">
-                    <i class="fab fa-github"></i>
-                </a>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Banner Section -->
-    <div class="banner d-flex align-items-center p-3 mb-4" style="background-color: white; color: black;">
-        <div class="profile-image me-3">
+    <!-- Enhanced Basic Info Banner -->
+    <div class="banner rounded shadow-sm d-flex align-items-center p-4 mb-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="profile-image me-4 position-relative">
             {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 100px; height: 100px;">
+                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle border border-3 border-white shadow" style="width: 120px; height: 120px; object-fit: cover;">
             {% else %}
-                <img src="{% static 'images/default.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 100px; height: 100px;">
+                <img src="{% static 'images/default.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle border border-3 border-white shadow" style="width: 120px; height: 120px; object-fit: cover;">
             {% endif %}
         </div>
         <div class="user-info">
-            <h2>{{ user.username }}</h2>
-            <p>{{ user.get_department_display }}</p>
-            <p>
-                <i class="fas fa-phone"></i> {{ user.phone }} &nbsp; 
-                <i class="fas fa-envelope"></i> {{ user.email }}
+            <h2 class="mb-2">{{ user.username }} <small class="text-muted fs-6">@{{ user.get_full_name }}</small></h2>
+            <p class="mb-2">
+                <i class="fas fa-building text-primary"></i> 
+                <span class="badge bg-primary">{{ user.get_department_display }}</span>
+                {% if user.role == 'student' %}
+                    <span class="badge bg-info ms-2">{{ user.get_class_year_display }}</span>
+                    <span class="badge bg-secondary ms-2">Division {{ user.division }}</span>
+                {% endif %}
+            </p>
+            <p class="mb-0">
+                <i class="fas fa-phone-alt text-success me-2"></i> {{ user.phone }}
+                <span class="mx-3">|</span>
+                <i class="fas fa-envelope text-danger me-2"></i> {{ user.email }}
             </p>
         </div>
     </div>
 
-    <!-- Election Participation -->
-
-    <!-- Update Profile Section -->
-    <div class="col-md-8 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h4>Update Profile</h4>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+    <div class="row">
+        <!-- Academic Details Card -->
+        {% if user.role == 'student' %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100 border-0 rounded-3">
+                <div class="card-header bg-gradient text-white py-3" style="background-color: #4e73df;">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Academic Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="academic-info">
+                        <div class="mb-4">
+                            <h5 class="text-muted small mb-2"><i class="fas fa-id-card me-2"></i>PRN</h5>
+                            <p class="h5 mb-0">{{ user.prn }}</p>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                        <div class="mb-4">
+                            <h5 class="text-muted small mb-2"><i class="fas fa-user-graduate me-2"></i>Academic Year</h5>
+                            <p class="h5 mb-0">{{ user.get_class_year_display }}</p>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ user.phone }}" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="department" class="form-label">Department</label>
-                            <select class="form-select" id="department" name="department" required>
-                                <option value="">Select Department</option>
-                                <option value="Administration" {% if user.department == "Administration" %}selected{% endif %}>Administration</option>
-                                <!-- Add other departments as needed -->
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="profile_picture" class="form-label">Profile Picture</label>
-                            <input type="file" class="form-control" id="profile_picture" name="profile_picture">
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="bio" class="form-label">Bio</label>
-                            <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio }}</textarea>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="linkedin_profile" class="form-label">LinkedIn Profile</label>
-                            <input type="url" class="form-control" id="linkedin_profile" name="linkedin_profile" value="{{ user.linkedin_profile }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="github_profile" class="form-label">GitHub Profile</label>
-                            <input type="url" class="form-control" id="github_profile" name="github_profile" value="{{ user.github_profile }}">
+                        <div class="mb-4">
+                            <h5 class="text-muted small mb-2"><i class="fas fa-users me-2"></i>Division</h5>
+                            <p class="h5 mb-0">{{ user.division }}</p>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Profile</button>
-                </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Update Profile Form -->
+        <div class="col-md-{% if user.role == 'student' %}8{% else %}12{% endif %} mb-4">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-gradient text-white py-3" style="background-color: #1cc88a;">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Update Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            {% for field in form %}
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    {% if field.name == 'first_name' %}<i class="fas fa-user me-2"></i>
+                                    {% elif field.name == 'last_name' %}<i class="fas fa-user me-2"></i>
+                                    {% elif field.name == 'email' %}<i class="fas fa-envelope me-2"></i>
+                                    {% elif field.name == 'phone' %}<i class="fas fa-phone me-2"></i>
+                                    {% elif field.name == 'department' %}<i class="fas fa-building me-2"></i>
+                                    {% elif field.name == 'profile_picture' %}<i class="fas fa-image me-2"></i>
+                                    {% elif field.name == 'linkedin_profile' %}<i class="fab fa-linkedin me-2"></i>
+                                    {% elif field.name == 'github_profile' %}<i class="fab fa-github me-2"></i>
+                                    {% elif field.name == 'bio' %}<i class="fas fa-comment me-2"></i>
+                                    {% endif %}
+                                    {{ field.label }}
+                                </label>
+                                {{ field.errors }}
+                                <div class="{% if field.name == 'bio' %}col-12{% endif %}">
+                                    {{ field }}
+                                </div>
+                                {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <div class="col-12">
+                                <button type="submit" name="update_profile" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Dropdown Menu -->
-    <div class="action-buttons">
-        <h5>Select Action</h5>
-        <div class="button-group">
-            <button class="action-button" onclick="showForm('complaints')">Complaints</button>
-            <button class="action-button" onclick="showForm('leave')">Leave Request</button>
-            <button class="action-button" onclick="showForm('health')">Health Request</button>
+    <!-- Complaint History Section -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4 mt-4">
+        <div class="card-header bg-gradient text-white py-3" style="background-color: #e74a3b;">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-history me-2"></i>Complaint History
+            </h4>
+        </div>
+        <div class="card-body">
+            {% if complaints %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                <th><i class="fas fa-tag me-2"></i>Subject</th>
+                                <th><i class="fas fa-list me-2"></i>Category</th>
+                                <th><i class="fas fa-info-circle me-2"></i>Status</th>
+                                <th><i class="fas fa-comment me-2"></i>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for complaint in complaints %}
+                                <tr>
+                                    <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ complaint.subject }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ complaint.get_category_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if complaint.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif complaint.status == 'in_progress' %}
+                                            <span class="badge bg-primary">In Progress</span>
+                                        {% elif complaint.status == 'resolved' %}
+                                            <span class="badge bg-success">Resolved</span>
+                                        {% elif complaint.status == 'rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ complaint.description }}">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">No complaints submitted yet.</p>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Complaints Form -->
-    <div class="form-section" id="complaintsForm" style="display: none;">
-        <h4 class="form-title">Submit Complaint</h4>
-        <form method="post" action="{% url 'complaints:submit_complaint' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" id="title" name="title" required>
+    <!-- Social Links Section -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-header bg-gradient text-white py-3" style="background-color: #36b9cc;">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-share-alt me-2"></i>Social Links
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="d-flex gap-3">
+                {% if user.linkedin_profile %}
+                    <a href="{{ user.linkedin_profile }}" class="btn btn-linkedin" target="_blank">
+                        <i class="fab fa-linkedin me-2"></i>LinkedIn
+                    </a>
+                {% endif %}
+                {% if user.github_profile %}
+                    <a href="{{ user.github_profile }}" class="btn btn-github" target="_blank">
+                        <i class="fab fa-github me-2"></i>GitHub
+                    </a>
+                {% endif %}
+                {% if not user.linkedin_profile and not user.github_profile %}
+                    <p class="text-muted mb-0">No social links added yet. Update your profile to add them!</p>
+                {% endif %}
             </div>
-            <div class="form-group">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
-            </div>
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="is_anonymous" name="is_anonymous">
-                <label class="form-check-label" for="is_anonymous">Submit Anonymously</label>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit Complaint</button>
-        </form>
+        </div>
     </div>
 
-    <!-- Leave Request Form -->
-    <div class="form-section" id="leaveForm" style="display: none;">
-        <h4 class="form-title">Submit Leave Request</h4>
-        <form method="post" action="{% url 'accounts:submit_leave_request' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="leave_request" class="form-label">Leave Request Details</label>
-                <textarea class="form-control" id="leave_request" name="leave_request" rows="3" required></textarea>
+    <!-- Action Buttons -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-header bg-gradient text-white py-3" style="background-color: #f6c23e;">
+            <h4 class="card-title mb-0">
+                <i class="fas fa-tasks me-2"></i>Quick Actions
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="d-flex gap-3">
+                <button class="btn btn-primary" onclick="showForm('complaints')">
+                    <i class="fas fa-exclamation-circle me-2"></i>Complaints
+                </button>
+                <button class="btn btn-success" onclick="showForm('leave')">
+                    <i class="fas fa-calendar-alt me-2"></i>Leave Request
+                </button>
+                <button class="btn btn-info" onclick="showForm('health')">
+                    <i class="fas fa-heartbeat me-2"></i>Health Request
+                </button>
             </div>
-            <div class="form-group">
-                <label for="leave_proof" class="form-label">Upload Proof (max 2MB)</label>
-                <input type="file" class="form-control" id="leave_proof" name="leave_proof" accept="image/*,application/pdf" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit Leave Request</button>
-        </form>
+        </div>
     </div>
 
-    <!-- Health Request Form -->
-    <div class="form-section" id="healthForm" style="display: none;">
-        <h4 class="form-title">Submit Health Request</h4>
-        <form method="post" action="{% url 'accounts:submit_health_request' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="health_request" class="form-label">Health Request Details</label>
-                <textarea class="form-control" id="health_request" name="health_request" rows="3" required></textarea>
+    <!-- Request Forms Section -->
+    <div class="row mt-4">
+        <!-- Complaints Form -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-3 mb-4" id="complaintsForm" style="display: none;">
+                <div class="card-header bg-gradient text-white py-3" style="background-color: #e74a3b;">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>Submit Complaint
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="complaint_subject" class="form-label">
+                                <i class="fas fa-tag me-2"></i>Subject
+                            </label>
+                            <input type="text" class="form-control" id="complaint_subject" name="complaint_subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="complaint_description" class="form-label">
+                                <i class="fas fa-comment-alt me-2"></i>Description
+                            </label>
+                            <textarea class="form-control" id="complaint_description" name="complaint_description" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="complaint_category" class="form-label">
+                                <i class="fas fa-list me-2"></i>Category
+                            </label>
+                            <select class="form-select" id="complaint_category" name="complaint_category" required>
+                                <option value="">Select Category</option>
+                                <option value="academic">Academic</option>
+                                <option value="infrastructure">Infrastructure</option>
+                                <option value="faculty">Faculty</option>
+                                <option value="lab">Laboratory</option>
+                                <option value="sports">Sports</option>
+                                <option value="transport">Transport</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" name="submit_complaint" class="btn btn-danger w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Complaint
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="health_proof" class="form-label">Upload Proof (max 2MB)</label>
-                <input type="file" class="form-control" id="health_proof" name="health_proof" accept="image/*,application/pdf" required>
+        </div>
+
+        <!-- Leave Request Form -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-3 mb-4" id="leaveForm" style="display: none;">
+                <div class="card-header bg-gradient text-white py-3" style="background-color: #1cc88a;">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Request Leave
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-calendar-day me-2"></i>Start Date</label>
+                            <input type="date" class="form-control" name="leave_start_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-calendar-day me-2"></i>End Date</label>
+                            <input type="date" class="form-control" name="leave_end_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-list me-2"></i>Leave Type</label>
+                            <select class="form-select" name="leave_type" required>
+                                <option value="">Select Type</option>
+                                <option value="medical">Medical Leave</option>
+                                <option value="personal">Personal Leave</option>
+                                <option value="emergency">Emergency Leave</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-comment-alt me-2"></i>Reason</label>
+                            <textarea class="form-control" name="leave_reason" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Leave Request
+                        </button>
+                    </form>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Health Request</button>
-        </form>
+        </div>
+
+        <!-- Health Request Form -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-3 mb-4" id="healthForm" style="display: none;">
+                <div class="card-header bg-gradient text-white py-3" style="background-color: #4e73df;">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-heartbeat me-2"></i>Health Request
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-thermometer-half me-2"></i>Symptoms</label>
+                            <input type="text" class="form-control" name="health_symptoms" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-clock me-2"></i>Duration</label>
+                            <input type="text" class="form-control" name="health_duration" placeholder="e.g., 2 days" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-exclamation-triangle me-2"></i>Severity</label>
+                            <select class="form-select" name="health_severity" required>
+                                <option value="">Select Severity</option>
+                                <option value="mild">Mild</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="severe">Severe</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-notes-medical me-2"></i>Additional Details</label>
+                            <textarea class="form-control" name="health_details" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="emergency" id="emergency">
+                                <label class="form-check-label" for="emergency">
+                                    <i class="fas fa-ambulance me-2"></i>This is an emergency
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Health Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Complaints History Section -->
@@ -218,21 +405,165 @@
     </div>
 </div>
 
+<style>
+.btn-linkedin {
+    background-color: #0077b5;
+    color: white;
+}
+.btn-github {
+    background-color: #333;
+    color: white;
+}
+.btn-linkedin:hover, .btn-github:hover {
+    opacity: 0.9;
+    color: white;
+}
+/* Add Bootstrap form-control class to all form inputs */
+form input[type="text"],
+form input[type="email"],
+form input[type="url"],
+form input[type="file"],
+form select,
+form textarea {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+form textarea {
+    min-height: 100px;
+}
+
+/* Form Styling */
+.form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Button hover effects */
+.btn:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s;
+}
+
+/* Form validation styling */
+.form-control.is-invalid {
+    border-color: #e74a3b;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23e74a3b' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e74a3b' stroke='none'/%3e%3c/svg%3e");
+}
+
+/* Date input styling */
+input[type="date"] {
+    position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+/* Card header gradients */
+.card-header.bg-gradient {
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* Additional styles for complaint history */
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}
+
+/* Status badge colors */
+.badge.bg-warning {
+    background-color: #f6c23e !important;
+}
+
+.badge.bg-primary {
+    background-color: #4e73df !important;
+}
+
+.badge.bg-success {
+    background-color: #1cc88a !important;
+}
+
+.badge.bg-danger {
+    background-color: #e74a3b !important;
+}
+
+.badge.bg-info {
+    background-color: #36b9cc !important;
+}
+</style>
+
 <script>
     function showForm(formType) {
-        // Hide all forms initially
+        // Hide all forms
         document.getElementById('complaintsForm').style.display = 'none';
         document.getElementById('leaveForm').style.display = 'none';
         document.getElementById('healthForm').style.display = 'none';
 
-        // Show the corresponding form based on the selected type
-        if (formType === 'complaints') {
-            document.getElementById('complaintsForm').style.display = 'block';
-        } else if (formType === 'leave') {
-            document.getElementById('leaveForm').style.display = 'block';
-        } else if (formType === 'health') {
-            document.getElementById('healthForm').style.display = 'block';
-        }
+        // Show the selected form with a fade-in effect
+        const selectedForm = document.getElementById(formType + 'Form');
+        selectedForm.style.display = 'block';
+        selectedForm.style.opacity = 0;
+        setTimeout(() => {
+            selectedForm.style.transition = 'opacity 0.3s ease-in-out';
+            selectedForm.style.opacity = 1;
+        }, 10);
     }
+
+    // Add form validation
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
 </script>
 {% endblock %}

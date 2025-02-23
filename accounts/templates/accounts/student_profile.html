@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ student.get_full_name }} - Student Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Student Profile</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Student Information -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Student Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if student.profile_picture %}
+                            <img src="{{ student.profile_picture.url }}" alt="Profile Picture" 
+                                 class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
+                        {% else %}
+                            <img src="{% static 'images/default_profile.png' %}" alt="Default Profile" 
+                                 class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
+                        {% endif %}
+                    </div>
+                    <h4 class="text-center mb-3">{{ student.get_full_name }}</h4>
+                    <p><strong>Registration Number:</strong> {{ student.username }}</p>
+                    <p><strong>Department:</strong> {{ student.department }}</p>
+                    <p><strong>Division:</strong> {{ student.get_division_display }}</p>
+                    <p><strong>Class Year:</strong> {{ student.get_class_year_display }}</p>
+                    <p><strong>Email:</strong> {{ student.email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Performance -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Academic Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h2>{{ student.get_gpa }}</h2>
+                                <p class="text-muted">Current GPA</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h2>{{ student.get_attendance_percentage }}%</h2>
+                                <p class="text-muted">Attendance</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4">Enrolled Courses</h5>
+                    <ul class="list-group">
+                        {% for course in academic_performance.courses %}
+                        <li class="list-group-item">{{ course }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Health Records -->
+            {% if health_records %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Health Records</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Condition</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in health_records %}
+                                <tr>
+                                    <td>{{ record.date_reported|date:"M d, Y" }}</td>
+                                    <td>{{ record.condition }}</td>
+                                    <td>{{ record.get_status_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Academic Integrity Cases -->
+            {% if request.user.role == 'faculty' and cheating_cases %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Academic Integrity Cases</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Course</th>
+                                    <th>Violation Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in cheating_cases %}
+                                <tr>
+                                    <td>{{ case.date_reported|date:"M d, Y" }}</td>
+                                    <td>{{ case.course }}</td>
+                                    <td>{{ case.get_violation_type_display }}</td>
+                                    <td>{{ case.get_status_display }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

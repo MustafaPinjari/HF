@@ -4,9 +4,10 @@ from .models import User, HealthRecord
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'role', 'department', 'phone', 'is_active')
-    list_filter = ('role', 'department', 'is_staff', 'is_active')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'student_id')
+    list_display = ('username', 'email', 'role', 'department', 'prn', 'division', 'class_year', 'is_active')
+    list_filter = ('role', 'department', 'division', 'class_year', 'is_staff', 'is_active')
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'prn')
+    readonly_fields = ('prn',)
     
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
@@ -17,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
             )
         }),
         ('Academic info', {
-            'fields': ('role', 'department', 'student_id')
+            'fields': ('role', 'department', 'prn', 'division', 'class_year')
         }),
         ('Social Media', {
             'fields': ('linkedin_profile', 'github_profile'),
@@ -36,7 +37,8 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'role', 'department'),
+            'fields': ('username', 'email', 'password1', 'password2', 'role', 
+                      'department', 'division', 'class_year'),
         }),
     )
 

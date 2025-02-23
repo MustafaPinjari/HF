@@ -9,6 +9,7 @@ venv\Scripts\activate
 # Install required packages
 ```
 pip install django-crispy-forms crispy-bootstrap4
+python -m pip install django-widget-tweaks
 ```
 
 # For Testing purposes
@@ -67,5 +68,4 @@ Username : faculty-teaching
 Password : 7s8m,5$L!
 '''
 
-
-the faculty sport member not able to see specials faculty dashboard its just a normal dashboard which is available to every one @
+@HF The case report must also be sent to Respective department 'Head of Department 'by which department student is registeredcreate this academic app more robusst and advanced

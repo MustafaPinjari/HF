@@ -1,59 +1,56 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load election_tags %}
+{% load static %}
 
-{% block title %}Available Elections{% endblock %}
+{% block title %}Elections{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Available Elections</h2>
+        <h2><i class="fas fa-vote-yea"></i> Elections</h2>
         {% if user.is_staff %}
-            <a href="{% url 'elections:create' %}" class="btn btn-primary">Create New Election</a>
+        <a href="{% url 'admin:elections_election_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Election
+        </a>
         {% endif %}
     </div>
 
-    {% if elections %}
-        <div class="row">
-            {% for election in elections %}
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ election.title }}</h5>
-                            <p class="card-text">{{ election.description|truncatewords:30 }}</p>
-                            <div class="text-muted mb-3">
-                                <small>Nominations Close: {{ election.nomination_end_date|date:"M d, Y H:i" }}</small><br>
-                                <small>Start: {{ election.start_date|date:"M d, Y H:i" }}</small><br>
-                                <small>End: {{ election.end_date|date:"M d, Y H:i" }}</small>
-                            </div>
-                            
-                            {% if election.nomination_end_date > now %}
-                                {% if election.id not in user_nominations %}
-                                    <a href="{% url 'elections:apply_nomination' election.id %}" class="btn btn-primary">Apply as Nominee</a>
-                                {% else %}
-                                    <div class="alert alert-info">
-                                        Your nomination status: 
-                                        <strong>{{ user_nominations|get_item:election.id|get_status_display }}</strong>
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                            
-                            {% if election.status == 'ongoing' %}
-                                {% for nomination in election.nomination_set.all %}
-                                    <a href="{% url 'elections:vote' election.id nomination.id %}" class="btn btn-success btn-sm">Vote for {{ nomination.user.username }}</a>
-                                {% endfor %}
-                            {% endif %}
-                            
-                            <a href="{% url 'elections:election_detail' election.id %}" class="btn btn-secondary">View Details</a>
-                        </div>
+    <div class="row">
+        {% for election in elections %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ election.title }}</h5>
+                    <p class="card-text">{{ election.description|truncatewords:30 }}</p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <strong>Nominations:</strong> 
+                            {{ election.nomination_start_date|date:"M d, Y" }} - 
+                            {{ election.nomination_end_date|date:"M d, Y" }}
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            <strong>Voting:</strong> 
+                            {{ election.voting_start_date|date:"M d, Y" }} - 
+                            {{ election.voting_end_date|date:"M d, Y" }}
+                        </small>
                     </div>
+                    
+                    <a href="{% url 'elections:election_detail' election.id %}" class="btn btn-primary">
+                        View Details
+                    </a>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    {% else %}
-        <div class="alert alert-info">
-            No active elections available at the moment.
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No elections are currently available.
+            </div>
         </div>
-    {% endif %}
+        {% endfor %}
+    </div>
 </div>
 {% endblock %} 

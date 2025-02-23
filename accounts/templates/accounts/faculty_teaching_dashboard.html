@@ -1,10 +1,131 @@
 <!-- templates/accounts/faculty_teaching_dashboard.html -->
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Faculty Teaching Staff Dashboard{% endblock %}
+{% block title %}Faculty Teaching Dashboard{% endblock %}
 
 {% block content %}
-<h2>Faculty Teaching Staff Dashboard</h2>
-<p>Manage leave requests and health concerns here.</p>
-<!-- Add functionality for managing leave requests -->
+<div class="container mt-4">
+    <h2>Faculty Teaching Dashboard</h2>
+    
+    <!-- Students Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">My Students</h5>
+        </div>
+        <div class="card-body">
+            {% if students %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Division</th>
+                            <th>Class Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.get_full_name }}</td>
+                            <td>{{ student.get_division_display }}</td>
+                            <td>{{ student.get_class_year_display }}</td>
+                            <td>
+                                <a href="{% url 'accounts:student_profile' student.username %}" 
+                                   class="btn btn-sm btn-info">View Profile</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No students assigned yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Academic Integrity Cases Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Academic Integrity Cases</h5>
+        </div>
+        <div class="card-body">
+            {% if cheating_cases %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Violation Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in cheating_cases %}
+                        <tr>
+                            <td>{{ case.student.get_full_name }}</td>
+                            <td>{{ case.course }}</td>
+                            <td>{{ case.get_violation_type_display }}</td>
+                            <td>{{ case.get_status_display }}</td>
+                            <td>
+                                <a href="{% url 'academic_integrity:case_detail' case.pk %}" 
+                                   class="btn btn-sm btn-info">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No academic integrity cases reported.</p>
+            {% endif %}
+            <div class="mt-3">
+                <a href="{% url 'academic_integrity:report_case' %}" class="btn btn-warning">
+                    <i class="fas fa-plus"></i> Report New Case
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Records Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Student Health Records</h5>
+        </div>
+        <div class="card-body">
+            {% if health_records %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Condition</th>
+                            <th>Date Reported</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in health_records %}
+                        <tr>
+                            <td>{{ record.student.get_full_name }}</td>
+                            <td>{{ record.condition }}</td>
+                            <td>{{ record.date_reported|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No health records to display.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

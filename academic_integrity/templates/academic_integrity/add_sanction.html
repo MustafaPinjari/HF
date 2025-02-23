@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add Sanction - {{ case.student.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'academic_integrity:case_list' %}">Cases</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'academic_integrity:case_detail' case.pk %}">Case Details</a></li>
+            <li class="breadcrumb-item active">Add Sanction</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0">Add Sanction</h4>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <h5>Case Information</h5>
+                <p><strong>Student:</strong> {{ case.student.get_full_name }}</p>
+                <p><strong>Course:</strong> {{ case.course }}</p>
+                <p><strong>Violation:</strong> {{ case.get_violation_type_display }}</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-gavel"></i> Issue Sanction
+                    </button>
+                    <a href="{% url 'academic_integrity:case_detail' case.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

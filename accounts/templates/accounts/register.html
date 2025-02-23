@@ -1,22 +1,29 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Register as {{ role|title }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title">Register</h3>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </form>
-                <p class="mt-3">
-                    Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>
-                </p>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Register as {{ role|title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                            <a href="{% url 'accounts:role_selection' %}" class="btn btn-outline-secondary">Change Role</a>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

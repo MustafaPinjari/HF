@@ -16,4 +16,7 @@ urlpatterns = [
     path('<int:election_id>/edit/', views.edit_election, name='edit'),
     path('<int:election_id>/vote_counts/', views.get_vote_counts, name='vote_counts'),
     path('<int:election_id>/apply/', views.apply_nomination, name='apply_nomination'),
+    path('<int:election_id>/withdraw/', views.withdraw_nomination, name='withdraw_nomination'),
+    path('<int:election_id>/vote/', views.cast_vote, name='cast_vote'),
+    path('<int:election_id>/results/', views.election_results, name='election_results'),
 ]

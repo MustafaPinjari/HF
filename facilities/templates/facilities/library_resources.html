@@ -3,18 +3,95 @@
 {% block title %}Library Resources{% endblock %}
 
 {% block content %}
-<h2>Library Resources</h2>
-<ul>
-    {% for resource in resources %}
-        <li>
-            <h3>{{ resource.title }}</h3>
-            <p>Author: {{ resource.author }}</p>
-            <p>Type: {{ resource.resource_type }}</p>
-            <p>Available: {{ resource.availability|yesno:"Yes,No" }}</p>
-            {% if resource.pdf_url %}
-                <p><a href="{{ resource.pdf_url }}" target="_blank" class="btn btn-primary">Open PDF</a></p>
-            {% endif %}
-        </li>
-    {% endfor %}
-</ul>
+<div class="container py-4">
+    <h2 class="mb-4">Library Resources</h2>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user_requests %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Your Active Book Requests</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Request Date</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in user_requests %}
+                        <tr>
+                            <td>{{ request.book.title }}</td>
+                            <td>{{ request.request_date|date }}</td>
+                            <td>
+                                <span class="badge {% if request.status == 'approved' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ request.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ request.due_date|date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        {% for book in books %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">
+                        <strong>Author:</strong> {{ book.author }}<br>
+                        <strong>Publisher:</strong> {{ book.publisher }}<br>
+                        <strong>Year:</strong> {{ book.publication_year }}<br>
+                        <strong>Available Copies:</strong> {{ book.available_copies }}/{{ book.total_copies }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if book.id in requested_books %}
+                            <button class="btn btn-secondary" disabled>Already Requested</button>
+                        {% elif book.available_copies > 0 and user.role != 'faculty-lab' %}
+                            <form method="post" action="{% url 'facilities:request_book' book.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">Request Book</button>
+                            </form>
+                        {% elif book.available_copies > 0 and user.role == 'faculty-lab' %}
+                            <form method="post" action="{% url 'facilities:request_book' book.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">Approve & Borrow</button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>Currently Unavailable</button>
+                        {% endif %}
+                        <a href="{{ book.book_link }}" target="_blank" class="btn btn-outline-primary">
+                            View PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No books available at the moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

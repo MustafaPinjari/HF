@@ -15,6 +15,7 @@ urlpatterns = [
     path('events/', views.event_list, name='event_list'),
     path('events/<int:event_id>/', views.event_detail, name='event_detail'),
     path('library/', views.library_resources, name='library_resources'),
+    path('library/request/<int:book_id>/', views.request_book, name='request_book'),
     path('career-services/', views.career_services, name='career_services'),
     path('support-services/', views.support_services, name='support_services'),
     path('extracurricular-activities/', views.extracurricular_activities, name='extracurricular_activities'),
@@ -23,4 +24,8 @@ urlpatterns = [
     path('events/create/', views.create_event, name='create_event'),
     path('manage/', views.manage_facilities, name='manage_facilities'),
     path('facilities/management/', views.facility_management, name='facility_management'),
+    path('books/', views.book_list, name='book_list'),
+    path('books/import/', views.import_books_from_csv, name='import_books'),
+    path('books/request/<int:book_id>/', views.request_book, name='request_book'),
+    path('books/my-books/', views.my_books, name='my_books'),
 ]

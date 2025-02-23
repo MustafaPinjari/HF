@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Facility, Course, Event, LibraryResource, CareerService, SupportService, ExtracurricularActivity, Alumni, TransportFacility, Booking
+from .models import Facility, Course, Event, LibraryResource, CareerService, SupportService, ExtracurricularActivity, Alumni, TransportFacility, Booking, Book, BookRequest
 from django.urls import path
 from django.shortcuts import render, redirect
 
@@ -81,3 +81,29 @@ class BookingAdmin(admin.ModelAdmin):
             'title': 'Pending Bookings',
         }
         return render(request, 'facilities/pending_bookings.html', context)
+
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'publisher', 'publication_year', 'available_copies', 'total_copies')
+    search_fields = ('title', 'author', 'publisher')
+    list_filter = ('publication_year', 'publisher')
+
+@admin.register(BookRequest)
+class BookRequestAdmin(admin.ModelAdmin):
+    list_display = ('book', 'user', 'request_date', 'due_date', 'status')
+    list_filter = ('status', 'request_date')
+    search_fields = ('book__title', 'user__username')
+    actions = ['approve_requests', 'reject_requests']
+
+    def approve_requests(self, request, queryset):
+        for book_request in queryset.filter(status='pending'):
+            if book_request.book.available_copies > 0:
+                book_request.status = 'approved'
+                book_request.book.available_copies -= 1
+                book_request.book.save()
+                book_request.save()
+    approve_requests.short_description = "Approve selected requests"
+
+    def reject_requests(self, request, queryset):
+        queryset.filter(status='pending').update(status='rejected')
+    reject_requests.short_description = "Reject selected requests"

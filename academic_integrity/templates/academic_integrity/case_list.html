@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Academic Integrity Cases{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Academic Integrity Cases</h2>
+        {% if perms.academic_integrity.can_manage_cases %}
+        <a href="{% url 'academic_integrity:report_case' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Report New Case
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date Reported</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Violation Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in cases %}
+                        <tr>
+                            <td>{{ case.date_reported|date:"M d, Y" }}</td>
+                            <td>{{ case.student.get_full_name }}</td>
+                            <td>{{ case.course }}</td>
+                            <td>{{ case.get_violation_type_display }}</td>
+                            <td>
+                                <span class="badge bg-{{ case.status|yesno:'success,warning' }}">
+                                    {{ case.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'academic_integrity:case_detail' case.pk %}" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No cases found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

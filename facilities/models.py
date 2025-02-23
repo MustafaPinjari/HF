@@ -1,6 +1,8 @@
 from django.db import models
 from accounts.models import User
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 class Facility(models.Model):
     FACILITY_TYPES = [
@@ -134,3 +136,50 @@ class TransportFacility(models.Model):
 
     def __str__(self):
         return self.name
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    publication_year = models.IntegerField(null=True, blank=True)
+    publisher = models.CharField(max_length=200, blank=True)
+    book_link = models.URLField(max_length=500, null=True, blank=True)
+    available_copies = models.IntegerField(default=1)
+    total_copies = models.IntegerField(default=1)
+    
+    def __str__(self):
+        return f"{self.title} by {self.author}"
+
+    @property
+    def is_available(self):
+        return self.available_copies > 0
+
+class BookRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('returned', 'Returned'),
+        ('overdue', 'Overdue'),
+    ]
+    
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    request_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True)
+    return_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    fine_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.due_date:
+            self.due_date = timezone.now().date() + timezone.timedelta(days=14)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title}"
+
+    def calculate_fine(self):
+        if self.status == 'returned' and self.return_date > self.due_date:
+            days_late = (self.return_date - self.due_date).days
+            self.fine_amount = days_late * 1  # $1 per day late
+            self.save()

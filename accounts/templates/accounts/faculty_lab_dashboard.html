@@ -1,10 +1,117 @@
 <!-- templates/accounts/faculty_lab_dashboard.html -->
 {% extends 'base.html' %}
 
-{% block title %}Faculty Lab Dashboard{% endblock %}
+{% block title %}Laboratory Faculty Dashboard{% endblock %}
 
 {% block content %}
-<h2>Faculty Lab Dashboard</h2>
-<p>Manage lab assignments and complaints here.</p>
-<!-- Add functionality for lab assignments -->
+<div class="container py-4">
+    <h1 class="mb-4">Laboratory & Library Management Dashboard</h1>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Book Requests Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title mb-0">Book Requests ({{ total_pending_books }})</h3>
+        </div>
+        <div class="card-body">
+            {% if book_requests %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
+                                <th>Requested By</th>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in book_requests %}
+                                <tr>
+                                    <td>{{ request.book.title }}</td>
+                                    <td>{{ request.user.get_full_name }}</td>
+                                    <td>{{ request.request_date|date }}</td>
+                                    <td>
+                                        <span class="badge {% if request.status == 'pending' %}bg-warning{% elif request.status == 'approved' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ request.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'pending' %}
+                                        <form method="post" action="{% url 'accounts:handle_book_request' request.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" name="status" value="approved" class="btn btn-success btn-sm">Approve</button>
+                                            <button type="submit" name="status" value="rejected" class="btn btn-danger btn-sm">Reject</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No pending book requests at this time.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Lab Complaints Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title mb-0">Lab Complaints ({{ total_pending_complaints }})</h3>
+        </div>
+        <div class="card-body">
+            {% if lab_complaints %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Lab</th>
+                                <th>Reported By</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for complaint in lab_complaints %}
+                                <tr>
+                                    <td>{{ complaint.title }}</td>
+                                    <td>{{ complaint.lab_name }}</td>
+                                    <td>{{ complaint.user.username }}</td>
+                                    <td>{{ complaint.created_at|date }}</td>
+                                    <td>{{ complaint.status }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'accounts:handle_lab_complaint' complaint.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <select name="status" class="form-select form-select-sm d-inline-block w-auto">
+                                                <option value="in_progress">Mark In Progress</option>
+                                                <option value="resolved">Mark Resolved</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No pending lab complaints at this time.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

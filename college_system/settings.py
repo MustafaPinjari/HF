@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'complaints',
     # 'budget',
     # 'accounts.apps.AccountsConfig',
+    'academic_integrity',
 ]
 
 # ... existing code ...

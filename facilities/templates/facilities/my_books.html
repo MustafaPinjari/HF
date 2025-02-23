@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My Books{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">My Books</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Request Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in book_requests %}
+                <tr>
+                    <td>{{ request.book.title }}</td>
+                    <td>{{ request.request_date|date:"M d, Y" }}</td>
+                    <td>{{ request.due_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge {% if request.status == 'approved' %}bg-success
+                                         {% elif request.status == 'pending' %}bg-warning
+                                         {% elif request.status == 'overdue' %}bg-danger
+                                         {% else %}bg-secondary{% endif %}">
+                            {{ request.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if request.fine_amount > 0 %}
+                        ${{ request.fine_amount }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">You haven't borrowed any books yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

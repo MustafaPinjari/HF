@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib import messages
-from .models import Facility, Booking, Course, Event, LibraryResource, CareerService, SupportService, ExtracurricularActivity, Alumni, TransportFacility
+from .models import Facility, Booking, Course, Event, LibraryResource, CareerService, SupportService, ExtracurricularActivity, Alumni, TransportFacility, Book, BookRequest
 from .forms import BookingForm, EventForm, FacilityForm
 from accounts.decorators import faculty_sports_required
+from datetime import datetime, timedelta
+from django.utils import timezone
+import csv
 
 @login_required
 def facility_list(request):
@@ -111,8 +114,89 @@ def event_list(request):
 
 @login_required
 def library_resources(request):
-    resources = LibraryResource.objects.all()
-    return render(request, 'facilities/library_resources.html', {'resources': resources})
+    books = Book.objects.all().order_by('title')
+    min_return_date = timezone.now().date() + timedelta(days=1)
+    default_return_date = timezone.now().date() + timedelta(days=14)
+    
+    # Get user's current book requests
+    user_requests = BookRequest.objects.filter(
+        user=request.user,
+        status__in=['pending', 'approved']
+    ).select_related('book')
+    
+    # Create a set of book IDs that the user has already requested
+    requested_books = {req.book.id for req in user_requests}
+    
+    context = {
+        'books': books,
+        'min_return_date': min_return_date,
+        'default_return_date': default_return_date,
+        'requested_books': requested_books,
+        'user_requests': user_requests
+    }
+    return render(request, 'facilities/library_resources.html', context)
+
+@login_required
+def import_books_from_csv(request):
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csv_file = request.FILES['csv_file']
+        decoded_file = csv_file.read().decode('utf-8').splitlines()
+        reader = csv.DictReader(decoded_file)
+        
+        for row in reader:
+            Book.objects.get_or_create(
+                isbn=row['isbn'],
+                defaults={
+                    'title': row['title'],
+                    'author': row['author'],
+                    'category': row.get('category', ''),
+                    'publication_year': row.get('publication_year'),
+                    'total_copies': int(row.get('copies', 1)),
+                    'available_copies': int(row.get('copies', 1))
+                }
+            )
+        messages.success(request, 'Books imported successfully!')
+        return redirect('facilities:book_list')
+    return render(request, 'facilities/import_books.html')
+
+@login_required
+def book_list(request):
+    books = Book.objects.all().order_by('title')
+    return render(request, 'facilities/book_list.html', {'books': books})
+
+@login_required
+def request_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Check if user already has a pending or approved request for this book
+    existing_request = BookRequest.objects.filter(
+        user=request.user,
+        book=book,
+        status__in=['pending', 'approved']
+    ).exists()
+    
+    if existing_request:
+        messages.error(request, 'You already have an active request for this book.')
+        return redirect('facilities:library_resources')
+    
+    if book.available_copies <= 0:
+        messages.error(request, 'This book is currently unavailable.')
+        return redirect('facilities:library_resources')
+    
+    # Create the book request
+    BookRequest.objects.create(
+        user=request.user,
+        book=book,
+        status='pending'
+    )
+    
+    messages.success(request, f'Your request for "{book.title}" has been submitted.')
+    return redirect('facilities:library_resources')
+
+@login_required
+def my_books(request):
+    book_requests = BookRequest.objects.filter(user=request.user).order_by('-request_date')
+    return render(request, 'facilities/my_books.html', {'book_requests': book_requests})
 
 @login_required
 def career_services(request):

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Choose Your Role{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Welcome to College Management System</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-center mb-4">Choose Your Role</h4>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-graduate fa-3x mb-3 text-primary"></i>
+                                    <h5>Student</h5>
+                                    <p class="small">Register as a student to access course materials and submit assignments</p>
+                                    <a href="{% url 'accounts:register' 'student' %}" class="btn btn-outline-primary">Register as Student</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chalkboard-teacher fa-3x mb-3 text-success"></i>
+                                    <h5>Faculty</h5>
+                                    <p class="small">Join as faculty to manage courses and student activities</p>
+                                    <a href="{% url 'accounts:register' 'faculty' %}" class="btn btn-outline-success">Register as Faculty</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-shield fa-3x mb-3 text-danger"></i>
+                                    <h5>Admin</h5>
+                                    <p class="small">Administrative access to manage the entire system</p>
+                                    <a href="{% url 'accounts:register' 'admin' %}" class="btn btn-outline-danger">Register as Admin</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Withdraw Nomination{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Withdraw Nomination</h4>
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to withdraw your nomination from "{{ election.title }}"?</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex gap-2">
+                    <a href="{% url 'elections:election_detail' election_id=election.id %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Confirm Withdrawal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

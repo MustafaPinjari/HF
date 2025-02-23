@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
-from .models import Election, Nomination, Vote
+from .models import Election, Nomination, Vote, Candidate
 from .forms import NominationForm, NominationAdminForm, ElectionForm
 import logging
 from django.http import JsonResponse
@@ -11,18 +11,11 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def election_list(request):
-    active_elections = Election.objects.filter(is_active=True).order_by('-start_date')
-    user_nominations = Nomination.objects.filter(user=request.user)
-    
-    # Create a dictionary of election_id: nomination for quick lookup
-    user_nomination_dict = {nom.election_id: nom for nom in user_nominations}
-    
-    context = {
-        'elections': active_elections,
-        'user_nominations': user_nomination_dict,
-        'now': timezone.now(),  # Add current time for comparison
-    }
-    return render(request, 'elections/election_list.html', context)
+    """Display list of all elections"""
+    elections = Election.objects.all().order_by('-created_at')
+    return render(request, 'elections/election_list.html', {
+        'elections': elections
+    })
 
 @login_required
 def election_detail(request, election_id):
@@ -30,7 +23,7 @@ def election_detail(request, election_id):
     nominations = Nomination.objects.filter(election=election, status='approved')
     
     # Check if the user has already voted
-    user_has_voted = Vote.objects.filter(user=request.user, election=election).exists()
+    user_has_voted = Vote.objects.filter(voter=request.user, election=election).exists()
     
     # Check if the user has already nominated
     user_nomination = Nomination.objects.filter(election=election, user=request.user).first()
@@ -253,31 +246,80 @@ def get_vote_counts(request, election_id):
 def apply_nomination(request, election_id):
     election = get_object_or_404(Election, pk=election_id)
     
-    # Check if nominations are still open
-    if timezone.now() > election.nomination_end_date:
+    # Check if nominations are open
+    if not election.is_nomination_open:
         messages.error(request, "Nominations are closed for this election.")
         return redirect('elections:election_detail', election_id=election_id)
     
-    # Check if user has already applied
-    existing_nomination = Nomination.objects.filter(election=election, user=request.user).first()
-    if existing_nomination:
-        messages.info(request, f"You have already applied. Your nomination status is: {existing_nomination.get_status_display()}")
+    # Check if user already applied
+    if Nomination.objects.filter(election=election, user=request.user).exists():
+        messages.error(request, "You have already applied for nomination in this election.")
         return redirect('elections:election_detail', election_id=election_id)
     
     if request.method == 'POST':
-        form = NominationForm(request.POST, request.FILES)
-        if form.is_valid():
-            nomination = form.save(commit=False)
-            nomination.user = request.user
-            nomination.election = election
-            nomination.status = 'pending'  # All nominations start as pending
-            nomination.save()
-            messages.success(request, 'Your nomination has been submitted and is pending admin approval.')
-            return redirect('elections:detail', election_id=election_id)
-    else:
-        form = NominationForm()
+        # Create nomination
+        Nomination.objects.create(
+            election=election,
+            user=request.user,
+            status='pending'
+        )
+        messages.success(request, "Your nomination has been submitted successfully.")
+        return redirect('elections:election_detail', election_id=election_id)
     
-    return render(request, 'elections/apply_nomination.html', {
-        'form': form,
-        'election': election
+    return render(request, 'elections/apply_nomination.html', {'election': election})
+
+@login_required
+def withdraw_nomination(request, election_id):
+    """
+    View to handle withdrawal of nomination from an election
+    """
+    election = get_object_or_404(Election, pk=election_id)
+    nomination = get_object_or_404(Nomination, election=election, candidate=request.user)
+    
+    if request.method == 'POST':
+        nomination.delete()
+        messages.success(request, 'Your nomination has been withdrawn successfully.')
+        return redirect('elections:election_detail', election_id=election_id)
+    
+    return render(request, 'elections/withdraw_nomination.html', {
+        'election': election,
+        'nomination': nomination
     })
+
+def cast_vote(request, election_id):
+    """
+    Handle casting a vote in an election
+    """
+    if request.method == 'POST':
+        election = get_object_or_404(Election, pk=election_id)
+        
+        # Check if election is active
+        if not election.is_active:
+            messages.error(request, 'This election is not currently active.')
+            return redirect('elections:detail', election_id=election_id)
+            
+        # Check if user has already voted
+        if Vote.objects.filter(election=election, voter=request.user).exists():
+            messages.error(request, 'You have already cast your vote in this election.')
+            return redirect('elections:detail', election_id=election_id)
+            
+        # Get the candidate
+        candidate_id = request.POST.get('candidate')
+        if not candidate_id:
+            messages.error(request, 'Please select a candidate.')
+            return redirect('elections:detail', election_id=election_id)
+            
+        candidate = get_object_or_404(Candidate, pk=candidate_id, election=election)
+        
+        # Create the vote
+        Vote.objects.create(
+            election=election,
+            voter=request.user,
+            candidate=candidate
+        )
+        
+        messages.success(request, 'Your vote has been recorded successfully.')
+        return redirect('elections:detail', election_id=election_id)
+        
+    # If GET request, redirect to election detail page
+    return redirect('elections:detail', election_id=election_id)

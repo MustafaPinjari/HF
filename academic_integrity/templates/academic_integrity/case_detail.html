@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Case Details - {{ case.student.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'academic_integrity:case_list' %}">Cases</a></li>
+            <li class="breadcrumb-item active">Case Details</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Case Details</h4>
+            <span class="badge bg-light text-dark">{{ case.get_status_display }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Student Information</h5>
+                    <p><strong>Name:</strong> {{ case.student.get_full_name }}</p>
+                    <p><strong>Course:</strong> {{ case.course }}</p>
+                    <p><strong>Exam Date:</strong> {{ case.exam_date|date:"F d, Y" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Case Information</h5>
+                    <p><strong>Violation Type:</strong> {{ case.get_violation_type_display }}</p>
+                    <p><strong>Severity:</strong> {{ case.get_severity_display }}</p>
+                    <p><strong>Reported By:</strong> {{ case.reported_by.get_full_name }}</p>
+                    <p><strong>Date Reported:</strong> {{ case.date_reported|date:"F d, Y" }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Description</h5>
+                <p>{{ case.description }}</p>
+            </div>
+
+            {% if case.evidence %}
+            <div class="mt-4">
+                <h5>Evidence</h5>
+                <a href="{{ case.evidence.url }}" class="btn btn-sm btn-secondary" target="_blank">
+                    <i class="fas fa-file"></i> View Evidence
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Sanctions Section -->
+            <div class="mt-4">
+                <h5>Sanctions</h5>
+                {% if sanctions %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Period</th>
+                                    <th>Issued By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sanction in sanctions %}
+                                <tr>
+                                    <td>{{ sanction.get_sanction_type_display }}</td>
+                                    <td>{{ sanction.description }}</td>
+                                    <td>{{ sanction.start_date|date:"M d, Y" }} - 
+                                        {% if sanction.end_date %}
+                                            {{ sanction.end_date|date:"M d, Y" }}
+                                        {% else %}
+                                            Ongoing
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ sanction.issued_by.get_full_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No sanctions have been issued yet.</p>
+                {% endif %}
+
+                {% if perms.academic_integrity.can_manage_cases %}
+                <a href="{% url 'academic_integrity:add_sanction' case.pk %}" class="btn btn-warning">
+                    <i class="fas fa-gavel"></i> Add Sanction
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Appeals Section -->
+            <div class="mt-4">
+                <h5>Appeals</h5>
+                {% if appeals %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date Submitted</th>
+                                    <th>Grounds</th>
+                                    <th>Status</th>
+                                    <th>Review Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appeal in appeals %}
+                                <tr>
+                                    <td>{{ appeal.submission_date|date:"M d, Y" }}</td>
+                                    <td>{{ appeal.grounds }}</td>
+                                    <td>{{ appeal.get_status_display }}</td>
+                                    <td>{{ appeal.reviewer_notes|default:"Not reviewed yet" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No appeals have been submitted.</p>
+                {% endif %}
+
+                {% if request.user == case.student and case.status != 'closed' %}
+                <a href="{% url 'academic_integrity:submit_appeal' case.pk %}" class="btn btn-info">
+                    <i class="fas fa-paper-plane"></i> Submit Appeal
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Case Management -->
+            {% if perms.academic_integrity.can_manage_cases %}
+            <div class="mt-4">
+                <h5>Case Management</h5>
+                <a href="{% url 'academic_integrity:update_case' case.pk %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Update Case Status
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Courses</h2>
+        {% if user.role == 'faculty' %}
+        <a href="{% url 'accounts:add_course' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Course
+        </a>
+        {% endif %}
+    </div>
+
+    {% if courses %}
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">{{ course.code }} - {{ course.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ course.description|truncatewords:30 }}</p>
+                    <ul class="list-unstyled">
+                        <li><strong>Department:</strong> {{ course.get_department_display }}</li>
+                        <li><strong>Credits:</strong> {{ course.credits }}</li>
+                        <li><strong>Semester:</strong> {{ course.semester }}</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{% url 'accounts:course_detail' course.id %}" class="btn btn-info btn-sm">
+                        <i class="fas fa-info-circle"></i> View Details
+                    </a>
+                    {% if user.role == 'faculty' %}
+                    <a href="{% url 'accounts:edit_course' course.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'accounts:mark_attendance' course.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-check"></i> Mark Attendance
+                    </a>
+                    {% elif user.role == 'student' and not course in user.get_enrolled_courses %}
+                    <a href="{% url 'accounts:enroll_course' course.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Enroll
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        {% if user.role == 'faculty' %}
+        No courses found. Click the "Add New Course" button to create one.
+        {% else %}
+        No courses available for enrollment at this time.
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 
